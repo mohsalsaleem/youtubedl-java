@@ -1,9 +1,12 @@
 package com.sapher.youtubedl.utils;
 
 import com.sapher.youtubedl.DownloadProgressCallback;
+import sun.nio.cs.StandardCharsets;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,20 +28,18 @@ public class StreamProcessExtractor extends Thread {
     }
 
     public void run() {
+
         try {
-            StringBuilder currentLine = new StringBuilder();
-            int nextChar;
-            while ((nextChar = stream.read()) != -1) {
-                buffer.append((char) nextChar);
-                if (nextChar == '\r' && callback != null) {
-                    processOutputLine(currentLine.toString());
-                    currentLine.setLength(0);
-                    continue;
+            String currentLine;
+            BufferedReader in = new BufferedReader(new InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8));
+            while ((currentLine = in.readLine()) != null) {
+                buffer.append(currentLine);
+                if(callback != null) {
+                    processOutputLine(currentLine);
                 }
-                currentLine.append((char) nextChar);
+                buffer.append("\r\n");
             }
-        } catch (IOException ignored) {
-        }
+        } catch (Exception ignored) {}
     }
 
     private void processOutputLine(String line) {
